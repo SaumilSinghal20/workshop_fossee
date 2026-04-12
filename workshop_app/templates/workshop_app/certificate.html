@@ -1,0 +1,59 @@
+{% extends 'workshop_app/base.html' %}
+{% load static %}
+
+{% block title %}Verify Certificate{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:900px; padding-top:2.5rem; padding-bottom:4rem;">
+    
+    <div class="page-header text-center" style="justify-content:center; flex-direction:column; gap:12px; margin-bottom: 2rem;">
+        <h1 style="font-weight:800; font-size:2.5rem; letter-spacing:-1px;">Certificate of Completion</h1>
+        <p class="text-muted" style="font-size:1.1rem; max-width:600px; margin:0 auto;">This is a verifiable digital certificate issued by the FOSSEE project, IIT Bombay.</p>
+    </div>
+
+    <div class="card" style="box-shadow: 0 20px 40px rgba(0,0,0,0.1); border-radius:12px; overflow:hidden; border:none; margin-bottom: 2rem; position:relative;">
+        <div style="background:#fff; padding:60px 80px; position:relative; text-align:center; border: 8px solid var(--clr-primary); outline: 1px solid rgba(234,88,12,0.3); outline-offset:-4px;">
+            <div style="position:absolute; top:20px; left:20px; opacity:0.1; width:200px; height:200px; background:url('https://upload.wikimedia.org/wikipedia/en/1/1d/Indian_Institute_of_Technology_Bombay_Logo.svg') no-repeat center/contain;"></div>
+            
+            <img src="{% static 'workshop_app/img/fossee_logo.png' %}" alt="FOSSEE" style="height:60px; margin-bottom:30px;">
+            
+            <h2 style="font-family:'Georgia', serif; font-size:1.8rem; color:#333; margin-bottom:10px;">PROUDLY PRESENTED TO</h2>
+            <h1 style="font-size:3.5rem; font-weight:800; color:var(--clr-primary); margin-top:20px; margin-bottom:20px; text-transform:uppercase; letter-spacing:2px; font-family:'Roboto', sans-serif;">{{ request.user.get_full_name|default:"Aman Kumar" }}</h1>
+            
+            <p style="font-size:1.4rem; color:#555; max-width:600px; margin:0 auto 40px; font-family:'Georgia', serif;">
+                has successfully completed the immersive <strong>3-Day Python for Scientific Computing</strong> hands-on workshop organized by FOSSEE, IIT Bombay.
+            </p>
+            
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:60px; padding:0 40px;">
+                <div style="text-align:center;">
+                    <div style="width:180px; border-bottom:2px solid #333; margin-bottom:10px;"></div>
+                    <span style="font-weight:600; color:#555;">Prof. Prabhu Ramachandran</span><br>
+                    <span style="font-size:0.85rem; color:#888;">Co-Principal Investigator, FOSSEE</span>
+                </div>
+                
+                <div style="text-align:center;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://fossee.in/certificate/12345" alt="QR Code" style="width:90px; height:90px; margin-bottom:10px;">
+                    <br>
+                    <span style="font-size:0.75rem; color:#888;">ID: FSK2026-9482X</span>
+                </div>
+
+                <div style="text-align:center;">
+                    <div style="width:180px; border-bottom:2px solid #333; margin-bottom:10px;"></div>
+                    <span style="font-weight:600; color:#555;">Prof. Kannan Moudgalya</span><br>
+                    <span style="font-size:0.85rem; color:#888;">Principal Investigator, FOSSEE</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="display:flex; justify-content:center; gap:1rem;">
+        <button class="btn btn-primary btn-lg" style="display:flex; align-items:center; gap:8px; font-weight:600;">
+            <span class="material-icons">file_download</span> Download High-Res PDF
+        </button>
+        <button class="btn btn-outline-secondary btn-lg" style="display:flex; align-items:center; gap:8px;">
+            <span class="material-icons">share</span> Add to LinkedIn
+        </button>
+    </div>
+
+</div>
+{% endblock %}

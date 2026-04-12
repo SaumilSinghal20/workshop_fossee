@@ -1,0 +1,131 @@
+{% extends 'workshop_app/base.html' %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:720px;padding-top:1.5rem">
+
+{% if Workshops %}
+    <div class="dashboard-header">
+        <div>
+            <h2>Dashboard</h2>
+            <p class="text-muted" style="margin:0;">Welcome back, {{ coordinator_profile.user.get_full_name|title }}</p>
+        </div>
+        <div class="avatar-circle" style="width:48px;height:48px;font-size:1.2rem;">
+            {{ coordinator_profile.user.first_name|first|upper }}{{ coordinator_profile.user.last_name|first|upper }}
+        </div>
+    </div>
+
+    <!-- Dashboard Widget Grid -->
+    <div class="dashboard-grid">
+        <div class="dash-stat-card">
+            <div class="dash-icon blue">
+                <span class="material-icons">business</span>
+            </div>
+            <div class="dash-stat-content">
+                <span class="dash-stat-val" style="font-size:1.1rem;word-break:break-word;">{{ coordinator_profile.user.profile.institute|truncatechars:20 }}</span>
+                <span class="dash-stat-label">Institute</span>
+            </div>
+        </div>
+
+        <div class="dash-stat-card">
+            <div class="dash-icon green">
+                <span class="material-icons">architecture</span>
+            </div>
+            <div class="dash-stat-content">
+                <span class="dash-stat-val" style="font-size:1.1rem;">{{ coordinator_profile.user.profile.department|truncatechars:15 }}</span>
+                <span class="dash-stat-label">Department</span>
+            </div>
+        </div>
+
+        <div class="dash-stat-card">
+            <div class="dash-icon orange">
+                <span class="material-icons">history_edu</span>
+            </div>
+            <div class="dash-stat-content">
+                <span class="dash-stat-val">{{ Workshops|length }}</span>
+                <span class="dash-stat-label">Total Workshops</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- past workshops they've been involved with -->
+    <p class="section-heading">Workshop History</p>
+    <div class="dash-table-card">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Instructor</th>
+                    <th>Date</th>
+                    <th>Workshop Type</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for workshop in Workshops %}
+                <tr>
+                    {% if workshop.instructor %}
+                    <td style="font-weight:500;">{{ workshop.instructor }}</td>
+                    {% else %}
+                    <td><span class="badge badge-secondary" style="background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1;">Pending</span></td>
+                    {% endif %}
+                    <td>{{ workshop.date }}</td>
+                    <td>{{ workshop.workshop_type }}</td>
+                    <td>
+                        {% if workshop.status %}
+                        <span class="badge badge-success" style="background:rgba(34, 197, 94, 0.1); color:#16a34a; border: 1px solid rgba(34, 197, 94, 0.2);">Accepted</span>
+                        {% else %}
+                        <span class="badge badge-warning" style="background:rgba(245, 158, 11, 0.1); color:#d97706; border: 1px solid rgba(245, 158, 11, 0.2);">Pending</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% else %}
+    <!-- no workshops yet — show the profile form instead -->
+    <div class="page-header">
+        <h2>Complete Your Profile</h2>
+    </div>
+
+    <div class="alert alert-info">
+        <span class="material-icons" style="font-size:16px">info</span>
+        <span>Please fill in your profile details to start proposing workshops.</span>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                <span class="material-icons" style="font-size:16px">error_outline</span>
+                <span>Please correct the highlighted errors.</span>
+            </div>
+            {% endif %}
+
+            <form action="" method="post">
+                {% csrf_token %}
+                <style>
+                    .profile-form th, .profile-form td { border:none; padding:0; display:block; width:100%; }
+                    .profile-form tr { display:block; margin-bottom:1rem; }
+                    .errorlist { list-style:none; padding:0; margin:4px 0 0; }
+                    .errorlist li { color:var(--clr-danger); font-size:.8rem; }
+                </style>
+                <table class="profile-form" style="width:100%">
+                    {{ form.as_table }}
+                </table>
+                <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.25rem">
+                    <button class="btn btn-success btn-lg" type="submit">
+                        <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px">save</span>
+                        Save Profile
+                    </button>
+                    <a href="{% url 'workshop_app:index' %}" class="btn btn-outline-info btn-lg">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endif %}
+
+</div>
+{% endblock %}

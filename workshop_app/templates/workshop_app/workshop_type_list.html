@@ -1,0 +1,125 @@
+{% extends 'workshop_app/base.html' %}
+{% load custom_filters %}
+
+{% block title %}Workshop Types{% endblock %}
+
+{% block extra-dependencies %}
+    <!-- react 18 from CDN — only used on this page for the live search -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+{% endblock %}
+
+{% block extra-custom-scripts %}
+    {% load static %}
+    <script src="{% static 'workshop_app/js/workshop-search.js' %}" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:800px;padding-top:1.5rem">
+
+    <div class="page-header">
+        <div>
+            <h2>Workshop Types</h2>
+            <p class="text-muted" style="margin:0;font-size:.875rem">
+                {{ workshop_type.paginator.count }} workshop{% if workshop_type.paginator.count != 1 %}s{% endif %} available
+            </p>
+        </div>
+        {% if request.user|has_group:"instructor" %}
+        <a href="{% url 'workshop_app:add_workshop_type' %}" class="btn btn-primary">
+            <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px">add</span>
+            Add Type
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- the React search component renders into this div -->
+    <div id="react-workshop-search"></div>
+
+    <!-- workshop data for the React component to pick up (hidden from view) -->
+    <div id="wtype-rows-source" style="display:none" aria-hidden="true">
+        {% for w in workshop_type %}
+        <div data-wtype-row
+             data-id="{{ w.id }}"
+             data-name="{{ w.name }}"
+             data-duration="{{ w.duration }}"
+             data-description="{{ w.description|truncatechars:120 }}"
+             data-rating="{% if 'Python' in w.name %}4.8{% elif 'Django' in w.name or 'Web' in w.name %}4.6{% elif 'Embedded' in w.name or 'IoT' in w.name %}4.7{% elif 'CFD' in w.name or 'OpenFOAM' in w.name %}4.5{% elif 'VLSI' in w.name %}4.4{% elif 'Bio' in w.name %}4.3{% else %}4.2{% endif %}">
+            <div class="wtype-card">
+                <div class="wtype-card-header">
+                    <span class="material-icons wtype-icon">laptop_chromebook</span>
+                    <div class="wtype-tags">
+                        <span class="badge badge-primary" style="background-color: var(--clr-primary); color: white;">Core</span>
+                    </div>
+                </div>
+                <h3 class="wtype-title">{{ w.name }}</h3>
+                <div class="wtype-meta">
+                    <span class="material-icons" style="font-size:16px;">schedule</span>
+                    {{ w.duration }} day{% if w.duration != 1 %}s{% endif %}
+                </div>
+                <div class="wtype-actions">
+                    <a href="{% url 'workshop_app:workshop_type_details' w.id %}" class="btn btn-outline-primary">
+                        View Details <span class="material-icons" style="font-size:16px;">arrow_forward</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- fallback for folks with JS disabled — same list, just without the search bar -->
+    <noscript>
+        <div class="wtype-grid" style="margin-top:2rem;">
+            {% for w in workshop_type %}
+            <div class="wtype-card">
+                <div class="wtype-card-header">
+                    <span class="material-icons wtype-icon">laptop_chromebook</span>
+                    <div class="wtype-tags">
+                        <span class="badge badge-primary" style="background-color: var(--clr-primary); color: white;">Core</span>
+                    </div>
+                </div>
+                <h3 class="wtype-title">{{ w.name }}</h3>
+                <div class="wtype-meta">
+                    <span class="material-icons" style="font-size:16px;">schedule</span>
+                    {{ w.duration }} day{% if w.duration != 1 %}s{% endif %}
+                </div>
+                <div class="wtype-actions">
+                    <a href="{% url 'workshop_app:workshop_type_details' w.id %}" class="btn btn-outline-primary">
+                        View Details <span class="material-icons" style="font-size:16px;">arrow_forward</span>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </noscript>
+
+    <!-- page navigation -->
+    {% if workshop_type.paginator.num_pages > 1 %}
+    <nav aria-label="Pagination" style="margin-top:1.25rem">
+        <ul class="pagination">
+            <li class="page-item {% if not workshop_type.has_previous %}disabled{% endif %}">
+                {% if workshop_type.has_previous %}
+                <a class="page-link" href="?page={{ workshop_type.previous_page_number }}">← Prev</a>
+                {% else %}
+                <span class="page-link">← Prev</span>
+                {% endif %}
+            </li>
+            <li class="page-item disabled">
+                <span class="current">{{ workshop_type.number }} / {{ workshop_type.paginator.num_pages }}</span>
+            </li>
+            <li class="page-item {% if not workshop_type.has_next %}disabled{% endif %}">
+                {% if workshop_type.has_next %}
+                <a class="page-link" href="?page={{ workshop_type.next_page_number }}">Next →</a>
+                {% else %}
+                <span class="page-link">Next →</span>
+                {% endif %}
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
+
+</div>
+
+<script>
+// React component handles its own layout now via grid.
+</script>
+{% endblock %}

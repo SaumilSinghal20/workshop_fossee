@@ -1,0 +1,224 @@
+{% extends 'workshop_app/base.html' %}
+{% load static %}
+{% block title %}Sign In{% endblock %}
+
+{% block content %}
+<div class="auth-split-wrapper" style="margin-top:-86px; padding-top:86px;">
+    <!-- LEFT PANEL: The actual form -->
+    <div class="auth-split-form">
+        <div class="auth-card"
+            style="box-shadow:none; border:none; background:transparent; padding:0; filter:none; animation:fadeInUp 0.5s ease-out; backdrop-filter:none;">
+            <img src="{% static 'workshop_app/img/fossee_logo.png' %}" alt="FOSSEE"
+                style="height:40px; margin:0.5rem auto 2.5rem; display:block; border-radius: 6px;">
+            <h1 class="auth-title">Welcome Back</h1>
+            <p class="auth-subtitle">Sign in to FOSSEE Workshops</p>
+
+
+
+            {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+            <div class="alert alert-danger" role="alert"
+                style="padding: 10px 14px; font-size: 0.85rem; display:flex; align-items:center; gap:8px;">
+                <span class="material-icons" style="font-size:18px">error_outline</span>
+                <span>{{ error|escape }}</span>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="post" id="loginForm">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="id_username">Username</label>
+                    <div class="input-icon-wrapper">
+                        <span class="material-icons prefix">person_outline</span>
+                        {{ form.username }}
+                    </div>
+                    {% if form.username.errors %}
+                    <div class="text-danger mt-1" style="font-size:0.8rem; display:flex; align-items:center; gap:4px;">
+                        <span class="material-icons" style="font-size:14px">warning</span> {{ form.username.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
+                        <label for="id_password" style="margin:0;">Password</label>
+                        <a href="{% url 'password_reset' %}"
+                            style="font-size:0.8rem; font-weight:500; text-decoration:none;">Forgot password?</a>
+                    </div>
+                    <div class="input-icon-wrapper">
+                        <span class="material-icons prefix">lock_outline</span>
+                        {{ form.password }}
+                        <button type="button" class="password-toggle" id="togglePassword"
+                            aria-label="Toggle password visibility">
+                            <span class="material-icons" id="toggleIcon">visibility_off</span>
+                        </button>
+                    </div>
+                    {% if form.password.errors %}
+                    <div class="text-danger mt-1" style="font-size:0.8rem; display:flex; align-items:center; gap:4px;">
+                        <span class="material-icons" style="font-size:14px">warning</span> {{ form.password.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group"
+                    style="display:flex; align-items:center; margin-top:-2px; margin-bottom:1.5rem;">
+                    <label
+                        style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.8rem; font-weight:500; margin:0; text-transform:none; color:var(--clr-text-muted);">
+                        <input type="checkbox" id="rememberMe"
+                            style="width:14px; height:14px; margin:0; cursor:pointer;">
+                        Remember me
+                    </label>
+                </div>
+
+                <button type="submit" id="signInBtn" class="btn btn-primary btn-lg"
+                    style="width:100%; display:flex; justify-content:center; align-items:center; gap:8px;">
+                    <span>Sign In</span>
+                    <span class="material-icons" style="font-size:18px;">login</span>
+                </button>
+            </form>
+
+            <div class="auth-links text-center"
+                style="margin-top:1.5rem; display:flex; flex-direction:column; align-items:center; gap:4px;">
+                <span style="color:var(--clr-text-muted); font-size:0.875rem;">Don't have an account?</span>
+                <a href="{% url 'workshop_app:register' %}"
+                    style="font-weight:600; text-decoration:none; color:var(--clr-primary);">Create one now</a>
+            </div>
+        </div>
+
+        <!-- Trust Badge -->
+        <div
+            style="text-align:center; margin-top:20px; color:var(--clr-text-muted); font-size:0.8rem; display:flex; align-items:center; justify-content:center; gap:6px; animation: fadeInUp 0.6s ease-out both;">
+            <span class="material-icons" style="font-size:16px; color:#16a34a;">verified_user</span>
+            <span>Secured by FOSSEE, IIT Bombay</span>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Showcase -->
+    <div class="auth-split-showcase">
+        <div class="showcase-content">
+            <div class="showcase-icon">
+                <span class="material-icons" style="font-size:4rem; color:#fff;">school</span>
+            </div>
+            <h2 class="showcase-title">Empowering Education</h2>
+            <p class="showcase-subtitle">Join thousands of educators and students from elite institutes across India to
+                access, propose, and interact with hands-on FOSSEE technical workshops.</p>
+            <div class="showcase-stats">
+                <div class="stat-item">
+                    <span class="stat-value">50k+</span>
+                    <span class="stat-label">Students</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">500+</span>
+                    <span class="stat-label">Institutes</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">120+</span>
+                    <span class="stat-label">Workshops</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const usernameInput = document.getElementById('id_username');
+        const passwordInput = document.getElementById('id_password');
+        const signInBtn = document.getElementById('signInBtn');
+        const togglePasswordBtn = document.getElementById('togglePassword');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const loginForm = document.getElementById('loginForm');
+
+        if (usernameInput && !usernameInput.classList.contains('form-control')) usernameInput.classList.add('form-control');
+        if (passwordInput && !passwordInput.classList.contains('form-control')) passwordInput.classList.add('form-control');
+
+        // Accessibility Configuration
+        if (usernameInput) usernameInput.setAttribute('autocomplete', 'username');
+        if (passwordInput) passwordInput.setAttribute('autocomplete', 'current-password');
+
+        // Live validation feedback
+        function createErrorMsg(id) {
+            let el = document.getElementById(id);
+            if (!el) {
+                el = document.createElement('div');
+                el.id = id;
+                el.className = 'text-danger mt-1';
+                el.style.cssText = 'font-size:0.75rem; display:none; align-items:center; gap:4px;';
+                el.innerHTML = '<span class="material-icons" style="font-size:14px">error</span><span class="msg-text"></span>';
+            }
+            return el;
+        }
+
+        if (usernameInput && passwordInput) {
+            const userErr = createErrorMsg('username-live-err');
+            usernameInput.parentNode.parentNode.appendChild(userErr);
+
+            usernameInput.addEventListener('input', function () {
+                if (this.value.trim().length === 0) {
+                    userErr.querySelector('.msg-text').textContent = 'Username is required.';
+                    userErr.style.display = 'flex';
+                    this.style.borderColor = 'var(--clr-danger)';
+                } else {
+                    userErr.style.display = 'none';
+                    this.style.borderColor = '';
+                }
+            });
+
+            const passErr = createErrorMsg('password-live-err');
+            passwordInput.parentNode.parentNode.appendChild(passErr);
+
+            passwordInput.addEventListener('input', function () {
+                if (this.value.trim().length === 0) {
+                    passErr.querySelector('.msg-text').textContent = 'Password is required.';
+                    passErr.style.display = 'flex';
+                    this.style.borderColor = 'var(--clr-danger)';
+                } else {
+                    passErr.style.display = 'none';
+                    this.style.borderColor = '';
+                }
+            });
+        }
+
+        if (togglePasswordBtn) {
+            togglePasswordBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                toggleIcon.textContent = type === 'password' ? 'visibility_off' : 'visibility';
+            });
+        }
+
+        if (loginForm) {
+            loginForm.addEventListener('submit', function (e) {
+                if (loginForm.checkValidity()) {
+                    if (usernameInput.value.trim().length === 0 || passwordInput.value.trim().length === 0) {
+                        e.preventDefault();
+                        // Trigger input manually
+                        usernameInput.dispatchEvent(new Event('input'));
+                        passwordInput.dispatchEvent(new Event('input'));
+                        return;
+                    }
+                    signInBtn.innerHTML = '<span class="material-icons spinning" style="font-size:18px; animation: spin 1s linear infinite;">autorenew</span><span>Signing in...</span>';
+                    signInBtn.style.opacity = '0.9';
+                    signInBtn.style.pointerEvents = 'none';
+                }
+            });
+        }
+
+    });
+</script>
+
+<style>
+    @keyframes spin {
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .spinning {
+        display: inline-block;
+    }
+</style>
+{% endblock %}

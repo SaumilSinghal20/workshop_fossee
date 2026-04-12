@@ -1,0 +1,136 @@
+{% extends "workshop_app/base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Workshop Status{% endblock %}
+
+{% block extra-dependencies %}
+    <link rel="stylesheet" href="{% static 'workshop_app/css/jquery-ui.css' %}">
+    <script src="{% static 'workshop_app/js/jquery-1.12.4.js' %}"></script>
+    <script src="{% static 'workshop_app/js/jquery-ui.min.js' %}"></script>
+{% endblock %}
+
+{% block extra-custom-scripts %}
+    {% load static %}
+    <script src="{% static 'workshop_app/js/datepicker.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:960px;padding-top:1.5rem">
+
+{% if not workshops %}
+    <div class="welcome-banner">
+        <h2>Hello, {{ user.first_name }} 👋</h2>
+        <p>Coordinator proposals will show up here. Check <strong>Workshop Types</strong> to review what's available.</p>
+    </div>
+
+{% else %}
+    <div class="page-header">
+        <h2>Workshop Status</h2>
+    </div>
+
+    <!-- workshops that have been picked up -->
+    <div style="margin-bottom:2.5rem">
+        <h4 style="font-size:1.15rem; font-weight:600; margin-bottom:1.25rem;">Accepted Workshops</h4>
+        <div class="wtype-grid">
+            {% for workshop in workshops %}
+                {% if workshop.status %}
+                <div class="wtype-card" style="display:flex; flex-direction:column; height:100%; animation: fadeInUp 0.4s ease-out;">
+                    <!-- Gradient Header -->
+                    <div style="background: linear-gradient(135deg, var(--clr-primary) 0%, var(--clr-secondary) 100%); border-radius: 12px 12px 0 0; padding: 18px 18px 14px; position: relative; overflow: hidden;">
+                        <div style="position: absolute; top: -16px; right: -16px; width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,.1);"></div>
+                        <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                            <span class="material-icons" style="font-size: 22px; color: #fff;">school</span>
+                        </div>
+                        <span style="font-size: 10px; font-weight: 700; color: #fff; background: rgba(22, 163, 74, 0.9); border-radius: 20px; padding: 2px 9px; letter-spacing: 0.06em; text-transform: uppercase;">{{ workshop.get_status }}</span>
+                        <h3 class="wtype-title" style="color: #fff; margin: 8px 0 0; font-size: 1rem; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,.2);">{{ workshop.workshop_type|capfirst }}</h3>
+                    </div>
+
+                    <!-- Body -->
+                    <div style="padding: 14px 16px; flex: 1; display: flex; flex-direction: column; gap: 10px; background: var(--clr-surface-solid);">
+                        <div class="wtype-meta" style="font-size: 13px; color: var(--clr-text-muted); display: flex; align-items: center; gap: 4px;">
+                            <span class="material-icons" style="font-size: 15px;">event</span>
+                            {{ workshop.date|date }}
+                            {% if workshop.date > today %}
+                            <span class="material-icons" style="font-size:16px;cursor:pointer;color:var(--clr-primary);margin-left:4px" title="Change date" onclick="changeDate('R,{{ workshop.date|safe }}, {{ forloop.counter }}')">edit_calendar</span>
+                            <div class="myDialogR{{ forloop.counter }}" style="display:none" title="Select New Date">
+                                <form method="post" action="{% url 'workshop_app:change_workshop_date' workshop.id %}">
+                                    <input type="text" placeholder="New date" name="new_date" class="rDate{{ forloop.counter }}" style="margin-bottom:8px">
+                                    {% csrf_token %}
+                                    <button class="btn btn-primary" type="submit">Save</button>
+                                </form>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="wtype-meta" style="font-size: 13px; color: var(--clr-text-muted); display: flex; flex-direction: column; gap: 2px;">
+                            <div style="display:flex; align-items:center; gap:4px">
+                                <span class="material-icons" style="font-size: 15px;">person</span>
+                                <a href="{% url 'workshop_app:view_profile' workshop.coordinator.id %}" style="font-weight:500;">{{ workshop.coordinator.get_full_name }}</a>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:4px; margin-left:19px;">
+                                <span class="material-icons" style="font-size: 14px; opacity:0.6;">account_balance</span>
+                                {{ workshop.coordinator.profile.institute|truncatechars:35 }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- still waiting on a response -->
+    <div>
+        <h4 style="font-size:1.15rem; font-weight:600; margin-bottom:1.25rem;">Pending Proposals</h4>
+        <div class="wtype-grid">
+            {% for workshop in workshops %}
+                {% if not workshop.status and workshop.tnc_accepted %}
+                <div class="wtype-card" style="display:flex; flex-direction:column; height:100%; animation: fadeInUp 0.5s ease-out;">
+                    <!-- Gradient Header -->
+                    <div style="background: linear-gradient(135deg, #64748b 0%, #334155 100%); border-radius: 12px 12px 0 0; padding: 18px 18px 14px; position: relative; overflow: hidden;">
+                        <div style="position: absolute; top: -16px; right: -16px; width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,.05);"></div>
+                        <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                            <span class="material-icons" style="font-size: 22px; color: #fff;">hourglass_empty</span>
+                        </div>
+                        <span style="font-size: 10px; font-weight: 700; color: #fff; background: rgba(217, 119, 6, 0.9); border-radius: 20px; padding: 2px 9px; letter-spacing: 0.06em; text-transform: uppercase;">{{ workshop.get_status }}</span>
+                        <h3 class="wtype-title" style="color: #fff; margin: 8px 0 0; font-size: 1rem; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,.2);">{{ workshop.workshop_type|capfirst }}</h3>
+                    </div>
+
+                    <!-- Body -->
+                    <div style="padding: 14px 16px; flex: 1; display: flex; flex-direction: column; gap: 10px; background: var(--clr-surface-solid);">
+                        <div class="wtype-meta" style="font-size: 13px; color: var(--clr-text-muted); display: flex; align-items: center; gap: 4px;">
+                            <span class="material-icons" style="font-size: 15px;">event</span>
+                            Proposed for: {{ workshop.date|date }}
+                        </div>
+                        <div class="wtype-meta" style="font-size: 13px; color: var(--clr-text-muted); display: flex; flex-direction: column; gap: 2px;">
+                            <div style="display:flex; align-items:center; gap:4px">
+                                <span class="material-icons" style="font-size: 15px;">person</span>
+                                <a href="{% url 'workshop_app:view_profile' workshop.coordinator.id %}" style="font-weight:500;">{{ workshop.coordinator.get_full_name }}</a>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:4px; margin-left:19px;">
+                                <span class="material-icons" style="font-size: 14px; opacity:0.6;">account_balance</span>
+                                {{ workshop.coordinator.profile.institute|truncatechars:35 }}
+                            </div>
+                        </div>
+
+                        <hr style="border: none; border-top: 1px solid var(--clr-border); margin: 4px 0;">
+
+                        <div style="display: flex; gap: 8px;">
+                            <form method="post" action="{% url 'workshop_app:accept_workshop' workshop.id %}" style="flex:1;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success" style="width:100%; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; font-size: 13px; margin: 0;" onclick="return confirm('Once accepted you cannot reject. Are you sure you want to accept this workshop?')">
+                                    <span class="material-icons" style="font-size:16px;">check_circle</span>
+                                    Accept
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+</div>
+{% endblock %}

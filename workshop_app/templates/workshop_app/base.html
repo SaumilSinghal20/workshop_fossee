@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+{% load custom_filters %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FOSSEE Workshops — Book and manage technical workshops by IIT Bombay">
+    <title>{% block title %}FOSSEE Workshops{% endblock %} | FOSSEE IIT Bombay</title>
+
+    <!-- google fonts: Sora (headings) + Inter (body) + Material Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Theme Detection: prevent flash of light theme -->
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark-theme');
+                document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-theme'));
+            }
+        })();
+    </script>
+
+    <!-- stylesheets -->
+    <link rel="stylesheet" href="{% static 'workshop_app/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'workshop_app/css/toastr.min.css' %}">
+    <link rel="stylesheet" href="{% static 'workshop_app/css/font-awesome.css' %}">
+    <link rel="stylesheet" href="{% static 'workshop_app/css/base.css' %}">
+
+    {% block extra-custom-scripts %}{% endblock %}
+    {% block extra-dependencies %}{% endblock %}
+
+    <!-- js libraries -->
+    <script src="{% static 'workshop_app/js/jquery-3.4.1.min.js' %}"></script>
+    <script src="{% static 'workshop_app/js/popper.min.js' %}"></script>
+    <script src="{% static 'workshop_app/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'workshop_app/js/toastr.min.js' %}"></script>
+</head>
+
+<body>
+
+<!-- ─── animated background blobs ─── -->
+<div class="bg-decoration" aria-hidden="true">
+    <div class="bg-blob bg-blob-1"></div>
+    <div class="bg-blob bg-blob-2"></div>
+    <div class="bg-blob bg-blob-3"></div>
+</div>
+
+<!-- ─── top navbar ─── -->
+{% block header %}
+<nav class="navbar navbar-expand-lg fixed-top" role="navigation" aria-label="Main navigation">
+
+    {% if user.is_authenticated %}
+    <a class="navbar-brand" href="{% url 'workshop_app:index' %}" aria-label="FOSSEE Workshops Home">
+    {% else %}
+    <a class="navbar-brand" href="{{ request.scheme }}://{{ request.get_host }}" aria-label="FOSSEE Workshops Home">
+    {% endif %}
+        <img src="{% static 'workshop_app/img/fossee_logo.png' %}" alt="FOSSEE" style="height:34px; margin-right:8px;">
+        <span style="font-weight:600">Workshops</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav"
+            aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav">
+        <!-- left side public links -->
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'workshop_app:modern_discovery' %}">Discovery</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'workshop_app:workshop_type_list' %}">Workshops</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'statistics_app:public' %}">Statistics</a>
+            </li>
+        </ul>
+
+        <!-- Mobile search bar -->
+        <form class="form-inline d-lg-none my-2" action="/" method="GET" style="position:relative;">
+            <input class="form-control w-100" type="search" name="q" placeholder="Search workshops..." aria-label="Search workshops" style="border-radius:20px; padding: 0.4rem 1rem 0.4rem 2.25rem; border:1px solid rgba(255,255,255,0.25); background:rgba(0,0,0,0.15); color:#fff; font-size:0.85rem;">
+            <span class="material-icons" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:rgba(255,255,255,0.7); font-size:18px; pointer-events:none;">search</span>
+        </form>
+
+        <!-- right side user actions -->
+        {% if user.is_authenticated %}
+        <ul class="navbar-nav ml-auto">
+            {% if request.user|has_group:"instructor" %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'statistics_app:team' %}">Team Stats</a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'workshop_app:workshop_status_instructor' %}">My Workshops</a>
+            </li>
+            {% if not request.user|has_group:"instructor" %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'workshop_app:propose_workshop' %}">Propose</a>
+            </li>
+            {% endif %}
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button"
+                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display:flex; align-items:center; gap:6px;">
+                    <span class="material-icons" style="font-size:18px;">account_circle</span>
+                    {{ user.get_full_name|title|default:user.username }}
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userMenu">
+                    <a class="dropdown-item" href="{% url 'workshop_app:view_own_profile' %}">
+                        <span class="material-icons" style="font-size:15px;vertical-align:middle;margin-right:6px">person</span>Profile
+                    </a>
+                    <a class="dropdown-item" href="{% url 'password_change' %}">
+                        <span class="material-icons" style="font-size:15px;vertical-align:middle;margin-right:6px">lock</span>Change Password
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="{% url 'workshop_app:logout' %}">
+                        <span class="material-icons" style="font-size:15px;vertical-align:middle;margin-right:6px">logout</span>Sign Out
+                    </a>
+                </div>
+            </li>
+            <li class="nav-item ml-lg-2">
+                <button class="btn btn-link nav-link p-0 d-flex align-items-center justify-content-center theme-toggle-btn" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.08); transition: background 0.2s;" aria-label="Toggle dark mode">
+                    <span class="material-icons theme-icon-span" style="font-size:20px; color:rgba(255,255,255,0.85);">brightness_4</span>
+                </button>
+            </li>
+        </ul>
+        {% else %}
+        <ul class="navbar-nav ml-auto" style="align-items:center; gap:12px;">
+            <li class="nav-item">
+                <a href="{% url 'workshop_app:login' %}" style="color:rgba(255,255,255,0.85); font-weight:500; font-size:0.875rem; text-decoration:none; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.85)'">Sign In</a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'workshop_app:register' %}" class="btn btn-primary" style="padding:0.4rem 1.1rem; font-size:0.85rem; border-radius:20px; box-shadow:none;">Register</a>
+            </li>
+            <li class="nav-item ml-lg-2">
+                <button class="btn btn-link nav-link p-0 d-flex align-items-center justify-content-center theme-toggle-btn" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.08); transition: background 0.2s;" aria-label="Toggle dark mode">
+                    <span class="material-icons theme-icon-span" style="font-size:20px; color:rgba(255,255,255,0.85);">brightness_4</span>
+                </button>
+            </li>
+        </ul>
+        {% endif %}
+    </div>
+
+    <!-- Desktop absolute center search bar -->
+    <div class="d-none d-lg-block position-absolute" style="left: 50%; transform: translateX(-50%); z-index: 10;">
+        <form class="form-inline" action="/" method="GET" style="position:relative;">
+            <input class="form-control" type="search" name="q" placeholder="Search workshops..." aria-label="Search workshops" style="border-radius:20px; padding: 0.4rem 1rem 0.4rem 2.25rem; border:1px solid rgba(255,255,255,0.25); background:rgba(0,0,0,0.15); color:#fff; font-size:0.85rem; transition: background 0.2s, border 0.2s; width: 250px;" onfocus="this.style.background='rgba(0,0,0,0.3)'; this.style.borderColor='var(--clr-primary)';">
+            <span class="material-icons" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:rgba(255,255,255,0.7); font-size:18px; pointer-events:none;">search</span>
+        </form>
+    </div>
+</nav>
+{% endblock %}
+
+<!-- ─── page content ─── -->
+<main class="base-content" id="main-content">
+    {% block content %}
+    {% endblock %}
+</main>
+
+<footer class="footer" role="contentinfo">
+    {% block footer %}
+    <div class="footer-container glass-footer">
+        <div class="footer-col brand-col">
+            <img src="{% static 'workshop_app/img/fossee_logo.png' %}" alt="FOSSEE" style="object-fit: contain; width: auto; max-width: 140px; height: 44px; margin-bottom:1rem; border-radius: 4px;">
+            <p>FOSSEE Workshops is an initiative by IIT Bombay to promote open-source software through hands-on training sessions across India.</p>
+        </div>
+        <div class="footer-col links-col">
+            <h4>Quick Links</h4>
+            <a href="/">Home</a>
+            <a href="{% url 'workshop_app:register' %}">Register for a workshop</a>
+            <a href="{% url 'statistics_app:public' %}">Statistics</a>
+            <a href="{% url 'workshop_app:workshop_type_list' %}">Workshop Types</a>
+        </div>
+        <div class="footer-col contact-col">
+            <h4>Contact Us</h4>
+            <a href="mailto:info@fossee.in"><span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:6px">email</span>info@fossee.in</a>
+            <p style="margin-top:8px; margin-bottom:12px; display:flex; align-items:center;">
+                <span class="material-icons" style="font-size:16px;margin-right:6px">place</span>
+                <a href="https://www.google.com/maps/search/?api=1&query=19.036419,72.859469" 
+                   target="_blank" 
+                   title="19°02′11.11″ N, 72°51′34.09″ E" 
+                   style="color:inherit; text-decoration:none; opacity:0.9;">IIT Bombay, Powai, Mumbai</a>
+            </p>
+            <div class="social-links" style="display:flex; gap:12px; margin-top:8px;">
+                <a href="https://x.com/FOSSEE" aria-label="Twitter Profile" target="_blank" style="opacity:0.8; transition:opacity 0.2s;"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v6/icons/twitter.svg" style="filter:invert(1); width:20px; height:20px;" alt=""></a>
+                <a href="https://www.linkedin.com/company/fossee-iitb/" aria-label="LinkedIn Profile" target="_blank" style="opacity:0.8; transition:opacity 0.2s;"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v6/icons/linkedin.svg" style="filter:invert(1); width:20px; height:20px;" alt=""></a>
+                <a href="https://youtube.com/@fosseeiitbombay?si=d3X2Wbfg7-MmIoiG" aria-label="YouTube Channel" target="_blank" style="opacity:0.8; transition:opacity 0.2s;"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v6/icons/youtube.svg" style="filter:invert(1); width:20px; height:20px;" alt=""></a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+        <div>Developed by <strong style="color:rgba(255,255,255,.9)">FOSSEE Group, IIT Bombay</strong></div>
+        <div style="display:flex; gap:15px; font-size:0.8rem;">
+            <a href="#" style="color:rgba(255,255,255,.7); text-decoration:none;">Privacy Policy</a>
+            <a href="#" style="color:rgba(255,255,255,.7); text-decoration:none;">Terms of Service</a>
+        </div>
+    </div>
+    {% endblock %}
+</footer>
+
+<!-- toast notifications (uses toastr.js) -->
+<script>
+toastr.options = {
+    closeButton: true,
+    progressBar: true,
+    positionClass: "toast-top-right",
+    timeOut: "4000"
+};
+{% if messages %}
+    {% for message in messages %}
+        toastr[{% if message.tags %}"{{ message.tags }}"{% else %}"info"{% endif %}]("{{ message }}");
+    {% endfor %}
+{% endif %}
+</script>
+
+    <!-- Theme Toggle Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtns = document.querySelectorAll('.theme-toggle-btn');
+            const themeIcons = document.querySelectorAll('.theme-icon-span');
+            
+            function updateIcons(isDark) {
+                themeIcons.forEach(icon => {
+                    icon.textContent = isDark ? 'light_mode' : 'brightness_4';
+                });
+            }
+
+            // Initial icon state
+            updateIcons(document.body.classList.contains('dark-theme'));
+
+            toggleBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const isDark = document.body.classList.toggle('dark-theme');
+                    document.documentElement.classList.toggle('dark-theme', isDark);
+                    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                    updateIcons(isDark);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

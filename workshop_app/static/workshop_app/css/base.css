@@ -1,0 +1,1450 @@
+/*
+ * base.css — main stylesheet for the FOSSEE Workshop Booking UI refresh
+ *
+ * I went with CSS custom properties for a simple "design system" instead of
+ * pulling in a whole utility framework. Keeps things readable and easy to
+ * tweak later if someone wants to change the colour palette, spacing, etc.
+ *
+ * Fonts: Sora (headings) + Inter (body text). Both loaded from Google Fonts
+ * in base.html. Sora gives a slightly techy feel while Inter is super
+ * readable at small sizes — seemed like a good combo for a workshop portal.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+/* ── Design tokens ─────────────────────────────────────────────────
+   Centralised here so the whole site stays consistent.
+   Just change a value and it ripples everywhere.                    */
+
+:root {
+  /* core blues — slightly richer than before */
+  --clr-primary:     #ea580c;
+  --clr-primary-dk:  #c2410c;
+  --clr-primary-lt:  #fff7ed;
+
+  /* secondary accent for gradients */
+  --clr-secondary:   #f97316;
+
+  /* status colours — used on badges, alerts, buttons */
+  --clr-accent:      #f97316;
+  --clr-success:     #16a34a;
+  --clr-warning:     #d97706;
+  --clr-danger:      #dc2626;
+
+  /* surfaces & text */
+  --clr-bg:          #f0f4f8;
+  --clr-surface:     rgba(255, 255, 255, 0.82);
+  --clr-surface-solid: #ffffff;
+  --clr-border:      rgba(226, 232, 240, 0.65);
+  --clr-text:        #1e293b;
+  --clr-text-muted:  #64748b;
+
+  /* navbar */
+  --clr-nav-bg:      rgba(15, 23, 42, 0.88);
+  --clr-nav-text:    #e2e8f0;
+
+  /* border radius — sm for inputs/buttons, md for cards, lg for big panels */
+  --radius-sm:       8px;
+  --radius-md:       14px;
+  --radius-lg:       20px;
+
+  /* shadows — layered for more realistic depth */
+  --shadow-sm:       0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:       0 4px 6px rgba(0,0,0,.04), 0 10px 20px rgba(0,0,0,.06);
+  --shadow-lg:       0 10px 25px rgba(0,0,0,.06), 0 20px 48px rgba(0,0,0,.09);
+  --shadow-glow:     0 0 20px rgba(234, 88, 12, 0.15);
+
+  --transition:      0.25s cubic-bezier(.4, 0, .2, 1);
+  --transition-slow: 0.4s cubic-bezier(.4, 0, .2, 1);
+  --font-head:       'Sora', sans-serif;
+  --font-body:       'Inter', sans-serif;
+}
+
+/* ── Dark theme overrides ────────────────────────────────────────── */
+body.dark-theme {
+  --clr-bg:          #0f172a;
+  --clr-surface:     rgba(30, 41, 59, 0.7);
+  --clr-surface-solid: #1e293b;
+  --clr-border:      rgba(51, 65, 85, 0.6);
+  --clr-text:        #f1f5f9;
+  --clr-text-muted:  #94a3b8;
+  --clr-nav-bg:      rgba(2, 6, 23, 0.92);
+  --clr-primary-lt:  rgba(234, 88, 12, 0.1);
+  --clr-primary-dk:  #fb923c; /* lighter orange for better contrast on dark */
+  
+  --shadow-sm:       0 1px 3px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2);
+  --shadow-md:       0 4px 6px rgba(0,0,0,.3), 0 10px 20px rgba(0,0,0,.4);
+  --shadow-lg:       0 10px 25px rgba(0,0,0,.4), 0 20px 48px rgba(0,0,0,.5);
+}
+
+
+
+/* ── Keyframe animations ───────────────────────────────────────── */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-14px) rotate(2deg); }
+}
+
+@keyframes float-reverse {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(10px) rotate(-2deg); }
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.04); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes blob-morph {
+  0%, 100% { border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; }
+  34%      { border-radius: 70% 30% 46% 54% / 30% 58% 42% 70%; }
+  67%      { border-radius: 30% 70% 54% 46% / 58% 30% 70% 42%; }
+}
+
+
+/* ── Reset & base typography ───────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--clr-bg);
+  color: var(--clr-text);
+  font-size: 0.9375rem;       /* 15px — slightly bigger than browser default */
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  font-family: var(--font-head);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--clr-text);
+}
+
+a { color: var(--clr-primary); text-decoration: none; transition: color var(--transition); }
+a:hover { color: var(--clr-primary-dk); text-decoration: underline; }
+
+
+/* ── Background decoration ─────────────────────────────────────── */
+/* Clean, intentional radial glow instead of random blobs. */
+
+.bg-decoration {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100vw; height: 100vh;
+  overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bg-blob-1 {
+  position: absolute;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(234, 88, 12, 0.15) 0%, transparent 60%);
+  border-radius: 50%;
+  top: 40%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.bg-blob-2, .bg-blob-3 {
+  display: none; /* Removed noisy background blobs to keep it intentional */
+}
+
+/* push the page content below the fixed navbar + above the fixed footer */
+.base-content {
+  padding-top: 80px;
+  padding-bottom: 64px;
+  min-height: 100vh;
+  animation: fadeIn 0.5s ease-out;
+}
+
+
+/* ── Navbar ────────────────────────────────────────────────────────
+   Glass effect with backdrop blur. Feels premium without being
+   obnoxious. The gradient underline ties it to the brand.          */
+
+.navbar {
+  background: var(--clr-nav-bg) !important;
+  backdrop-filter: blur(16px) saturate(1.8);
+  -webkit-backdrop-filter: blur(16px) saturate(1.8);
+  z-index: 1050;
+  padding: 0 1.5rem;
+  height: 68px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  box-shadow: 0 4px 20px rgba(0,0,0,.2);
+}
+
+/* subtle gradient line at the bottom of the navbar */
+.navbar::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #ea580c, #f97316, #06b6d4, #ea580c);
+  background-size: 300% 100%;
+  animation: gradientShift 8s ease infinite;
+  opacity: 0.7;
+}
+
+.navbar-brand {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 1.08rem;
+  color: #fff !important;
+  letter-spacing: -0.2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* the "FW" square next to the brand text — now with gradient */
+.nav-logo-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #ea580c, #f97316);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.navbar-brand:hover .nav-logo-icon {
+  transform: rotate(-6deg) scale(1.08);
+  box-shadow: 0 0 16px rgba(249, 115, 22, 0.4);
+}
+
+.navbar-nav .nav-link {
+  color: var(--clr-nav-text) !important;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.45rem 0.85rem !important;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition), transform var(--transition);
+  position: relative;
+}
+
+.navbar-nav .nav-link:hover {
+  background: rgba(255,255,255,.1);
+  color: #fff !important;
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+/* active nav item indicator */
+.navbar-nav .nav-link.active {
+  background: rgba(255,255,255,.12);
+}
+
+/* hamburger icon — custom SVG so it shows up white on the dark bg */
+.navbar-toggler {
+  border: 1px solid rgba(255,255,255,.25);
+  padding: 4px 8px;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255,255,255,0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* user menu dropdown — glass effect */
+.dropdown-menu {
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  min-width: 170px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dropdown-item {
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  padding: 8px 14px;
+  color: var(--clr-text);
+  transition: all var(--transition);
+}
+
+.dropdown-item:hover {
+  background: var(--clr-primary-lt);
+  color: var(--clr-primary);
+  transform: translateX(3px);
+}
+
+
+/* ── Cards ─────────────────────────────────────────────────────────
+   Glassmorphism + gradient accent top. The blur effect gives
+   depth without heavy shadows.                                      */
+
+.card {
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  background: var(--clr-surface);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
+  transition: box-shadow var(--transition), transform var(--transition);
+  animation: fadeInUp 0.45s ease-out both;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* thin gradient strip at the top of cards */
+.card::before {
+  content: '';
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, #ea580c, #f97316);
+  opacity: 0.6;
+}
+
+.card-header {
+  background: rgba(248, 250, 252, 0.5);
+  border-bottom: 1px solid var(--clr-border);
+  padding: 1rem 1.25rem;
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: var(--font-head);
+}
+
+.card-body { padding: 1.5rem 1.25rem; }
+
+
+/* ── Buttons ───────────────────────────────────────────────────────
+   Gradient fills, glow on hover, subtle lift. Feels premium
+   without going full neon.                                          */
+
+.btn {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.875rem;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1.15rem;
+  transition: all var(--transition);
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary {
+  background: #ea580c; /* Stronger, solid orange */
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(234, 88, 12, 0.25);
+  border: 1px solid #c2410c;
+}
+.btn-primary:hover {
+  background: #c2410c; /* Darker shade on hover */
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(234, 88, 12, 0.4);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.2);
+}
+.btn-success:hover {
+  background: linear-gradient(135deg, #15803d, #166534);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.3);
+}
+
+.btn-outline-info {
+  border: 1.5px solid var(--clr-primary);
+  color: var(--clr-primary);
+  background: transparent;
+}
+.btn-outline-info:hover {
+  background: var(--clr-primary);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.25);
+}
+
+.btn-outline-danger {
+  border: 1.5px solid var(--clr-danger);
+  color: var(--clr-danger);
+  background: transparent;
+}
+.btn-outline-danger:hover {
+  background: var(--clr-danger);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.btn-md { padding: 0.55rem 1.3rem; }
+.btn-lg { padding: 0.65rem 1.5rem; font-size: 0.95rem; }
+
+
+/* ── Forms ─────────────────────────────────────────────────────────
+   I kept the labels uppercase + small because it separates them
+   visually from the field content. The animated focus ring gives
+   nice tactile feedback.                                            */
+
+.form-group { margin-bottom: 1.15rem; }
+
+.form-group label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--clr-text-muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: color var(--transition);
+}
+
+.form-group:focus-within label {
+  color: var(--clr-primary);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="date"],
+select,
+textarea,
+.form-control {
+  width: 100%;
+  padding: 11px 15px;
+  border: 1.5px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--clr-text);
+  background: rgba(255, 255, 255, 0.75);
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+  outline: none;
+}
+
+input:focus, select:focus, textarea:focus, .form-control:focus {
+  border-color: var(--clr-primary);
+  box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.15);
+  background: rgba(255, 255, 255, 0.95);
+  outline: 2px solid var(--clr-primary);
+  outline-offset: -1px;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--clr-primary);
+  outline-offset: 3px;
+  box-shadow: none;
+}
+
+textarea.form-control { resize: vertical; min-height: 100px; }
+
+label.required::after { content: " *"; color: var(--clr-danger); }
+
+
+/* Input wrapper for icons inside fields */
+.input-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-icon-wrapper .material-icons.prefix {
+  position: absolute;
+  left: 14px;
+  color: var(--clr-text-muted);
+  font-size: 20px;
+  pointer-events: none;
+  transition: color var(--transition);
+  z-index: 2;
+}
+.input-icon-wrapper .form-control {
+  padding-left: 44px; /* Make room for the left icon */
+}
+.input-icon-wrapper:focus-within .material-icons.prefix {
+  color: var(--clr-primary);
+}
+
+.password-toggle {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--clr-text-muted);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color var(--transition);
+  z-index: 2;
+}
+.password-toggle:hover {
+  color: var(--clr-primary);
+}
+
+/* ── Tables ────────────────────────────────────────────────────────
+   The original project dumped raw <table>s everywhere. These
+   styles make them look way nicer. Added a subtle hover with
+   gradient reveal instead of a flat colour swap.                    */
+
+.table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+
+.table thead th {
+  background: rgba(248, 250, 252, 0.8);
+  color: var(--clr-text-muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 11px 14px;
+  border-bottom: 2px solid var(--clr-border);
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--clr-border);
+  vertical-align: middle;
+  transition: background var(--transition);
+}
+
+.table tbody tr:last-child td { border-bottom: none; }
+
+.table-hover tbody tr {
+  transition: all var(--transition);
+}
+
+.table-hover tbody tr:hover {
+  background: linear-gradient(90deg, rgba(234, 88, 12, 0.04), rgba(249, 115, 22, 0.03));
+}
+
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--clr-border);
+  box-shadow: var(--shadow-sm);
+  background: var(--clr-surface);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+
+/* ── Badges ────────────────────────────────────────────────────────
+   Pill-shaped status indicators. Added subtle inner glow.           */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 11px;
+  border-radius: 99px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: transform var(--transition);
+}
+
+.badge:hover { transform: scale(1.05); }
+
+.badge-success { background: #dcfce7; color: var(--clr-success); box-shadow: inset 0 0 0 1px rgba(22,163,74,0.12); }
+.badge-warning { background: #fef3c7; color: var(--clr-warning); box-shadow: inset 0 0 0 1px rgba(217,119,6,0.12); }
+.badge-danger  { background: #fee2e2; color: var(--clr-danger);  box-shadow: inset 0 0 0 1px rgba(220,38,38,0.12); }
+.badge-info    { background: var(--clr-primary-lt); color: var(--clr-primary); box-shadow: inset 0 0 0 1px rgba(234,88,12,0.1); }
+.badge-primary { background: var(--clr-primary-lt); color: var(--clr-primary); box-shadow: inset 0 0 0 1px rgba(234,88,12,0.1); }
+
+
+/* ── Alerts ────────────────────────────────────────────────────────
+   Left-border accent makes them easy to spot without being
+   too loud. Glass background.                                       */
+
+.alert {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  border: none;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: fadeInUp 0.3s ease-out both;
+}
+
+.alert-info    { background: rgba(239,246,255,.85); color: #9a3412; border-left: 3px solid var(--clr-primary); }
+.alert-success { background: rgba(240,253,244,.85); color: #166534; border-left: 3px solid var(--clr-success); }
+.alert-danger  { background: rgba(254,242,242,.85); color: var(--clr-danger); border-left: 3px solid var(--clr-danger); }
+.alert-warning { background: rgba(255,251,235,.85); color: #92400e; border-left: 3px solid var(--clr-warning); }
+.alert-dismissible .close { background: transparent; border: none; font-size: 1.1rem; cursor: pointer; margin-left: auto; opacity: .6; }
+.alert-dismissible .close:hover { opacity: 1; }
+
+
+/* ── Pagination ────────────────────────────────────────────────────  */
+
+.pagination { display: flex; gap: 4px; list-style: none; padding: 0; margin: 1.5rem 0; align-items: center; justify-content: center; flex-wrap: wrap; }
+
+.page-item .page-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--clr-border);
+  color: var(--clr-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all var(--transition);
+  background: var(--clr-surface);
+}
+
+.page-item .page-link:hover,
+.page-item.active .page-link {
+  background: linear-gradient(135deg, #ea580c, #c2410c);
+  border-color: transparent;
+  color: #fff;
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+}
+
+.current { padding: 0 10px; font-size: 0.875rem; color: var(--clr-text-muted); }
+
+
+/* ── Footer ────────────────────────────────────────────────────────
+   New multi-column fat footer. Feels like a proper SaaS homepage.   */
+
+.footer {
+  background: rgba(15, 23, 42, 0.96);
+  color: rgba(255,255,255,.65);
+  font-size: 0.85rem;
+  z-index: 100;
+  position: relative;
+  margin-top: auto;
+}
+
+.glass-footer {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.footer-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 2.5rem;
+  padding: 4rem 2rem 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-logo {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, #ea580c, #f97316);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 1rem;
+  color: #fff;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(234,88,12,.3);
+}
+
+.brand-col p {
+  line-height: 1.6;
+  font-size: 0.875rem;
+  max-width: 380px;
+}
+
+.footer-col h4 {
+  color: #fff;
+  font-size: 1rem;
+  margin-bottom: 1.25rem;
+  font-weight: 600;
+}
+
+.footer-col a {
+  color: rgba(255,255,255,.65);
+  margin-bottom: 0.75rem;
+  transition: color var(--transition);
+  display: inline-block;
+}
+
+.footer-col a:hover {
+  color: #fff;
+  text-decoration: none;
+  transform: translateX(3px);
+}
+
+.footer-bottom {
+  text-align: center;
+  padding: 1.5rem;
+  border-top: 1px solid rgba(255,255,255,.08);
+  font-size: 0.8rem;
+  color: rgba(255,255,255,.45);
+}
+
+/* gradient line on top of footer */
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ea580c, #f97316, transparent);
+  opacity: 0.8;
+}
+
+
+/* ── Auth pages (login, register, activation, logout) ──────────────
+   Complete redesign — split layout on desktop, animated blobs,
+   glass card on the right.                                          */
+
+.auth-split-wrapper {
+  display: flex;
+  flex-direction: column; /* stacked on mobile */
+  min-height: calc(100vh - 86px); /* account for standard navbar */
+  background: var(--clr-background);
+}
+
+@media (min-width: 992px) {
+  .auth-split-wrapper {
+    flex-direction: row; /* split on desktop */
+  }
+}
+
+.auth-split-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  background: var(--clr-background);
+}
+
+.auth-split-showcase {
+  display: none; /* hidden on mobile */
+  flex: 1;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(234, 88, 12, 0.85)), url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80') center/cover;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  color: #fff;
+  text-align: center;
+  overflow: hidden;
+}
+
+@media (min-width: 992px) {
+  .auth-split-showcase {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.showcase-content {
+  position: relative;
+  z-index: 2;
+  max-width: 450px;
+  animation: fadeInUp 0.8s ease-out both;
+}
+
+.showcase-icon {
+  font-size: 4rem;
+  background: rgba(255,255,255,0.1);
+  padding: 1.5rem;
+  border-radius: 50%;
+  margin-bottom: 2rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.showcase-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  letter-spacing: -1px;
+}
+
+.showcase-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
+}
+
+.showcase-stats {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255,255,255,0.2);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.8;
+  margin-top: 5px;
+}
+
+.auth-card {
+  background: var(--clr-surface);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 400px;
+  padding: 2.5rem 2rem;
+  animation: fadeInUp 0.5s ease-out both;
+  position: relative;
+  transition: box-shadow 0.3s ease;
+}
+
+.auth-card:focus-within {
+  box-shadow: 0 12px 40px rgba(234, 88, 12, 0.15);
+}
+
+/* gradient top accent on auth card */
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ea580c, #f97316);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.auth-logo-block {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #ea580c, #f97316);
+  border-radius: 12px;
+  margin: 0 auto 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-head);
+  font-weight: 700;
+  color: #fff;
+  font-size: 1.15rem;
+  box-shadow: 0 4px 14px rgba(234,88,12,.25);
+}
+
+/* ensure the logo block is always visible now */
+
+.auth-title { font-size: 1.8rem; font-weight: 800; text-align: center; margin-bottom: 0.2rem; letter-spacing: -0.5px; color: var(--clr-text); }
+.auth-subtitle { text-align: center; color: rgba(30,41,59,0.5); font-weight: 400; font-size: 0.95rem; margin-bottom: 2rem; }
+.auth-divider { border: none; border-top: 1px solid var(--clr-border); margin: 1.25rem 0; }
+
+.auth-links { display: flex; flex-direction: column; gap: 8px; margin-top: 0.5rem; }
+.auth-links a {
+  font-size: 0.875rem;
+  color: var(--clr-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+}
+.auth-links a:hover {
+  background: var(--clr-primary-lt);
+  text-decoration: none;
+}
+
+
+/* ── Welcome banner ────────────────────────────────────────────────
+   Shows up on the dashboard when there's nothing to display yet.
+   Better gradient with animated floating particles.                 */
+
+.welcome-banner {
+  background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 50%, #f97316 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 12s ease infinite;
+  border-radius: var(--radius-lg);
+  padding: 2rem 2rem;
+  color: #fff;
+  margin-bottom: 1.75rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(234, 88, 12, 0.2);
+}
+
+/* decorative circles — two of them now, different sizes */
+.welcome-banner::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+  pointer-events: none;
+  animation: float 10s ease-in-out infinite;
+}
+
+.welcome-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -30px;
+  left: 20%;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.05);
+  pointer-events: none;
+  animation: float-reverse 12s ease-in-out infinite;
+}
+
+.welcome-banner h2 { font-size: 1.5rem; color: #fff; margin-bottom: 0.4rem; position: relative; z-index: 1; }
+.welcome-banner p  { color: rgba(255,255,255,.75); margin: 0; font-size: 0.9rem; position: relative; z-index: 1; }
+
+
+/* ── Section headings ──────────────────────────────────────────────
+   Those small uppercase labels with a line after them.              */
+
+.section-heading {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--clr-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-heading::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--clr-border), transparent);
+}
+
+
+/* ── Page title bar ────────────────────────────────────────────────  */
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  animation: fadeInUp 0.35s ease-out both;
+}
+
+.page-header h2 { margin: 0; font-size: 1.4rem; }
+
+
+/* ── User Dashboard (Interactive Profile) ──────────────────────────── */
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.dash-stat-card {
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition);
+  animation: fadeInUp 0.5s ease-out both;
+}
+
+.dash-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+.dash-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.dash-icon.blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.dash-icon.green { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+.dash-icon.orange { background: rgba(249, 115, 22, 0.1); color: var(--clr-primary); }
+
+.dash-stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.dash-stat-val {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--clr-text);
+}
+
+.dash-stat-label {
+  font-size: 0.85rem;
+  color: var(--clr-text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+/* Updated Table Wrap for Dashboard */
+.dash-table-card {
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  animation: fadeInUp 0.6s ease-out both;
+}
+
+.dash-table-card table { margin-bottom: 0; }
+
+.dash-table-card thead th {
+  background: rgba(0,0,0,0.02);
+  border-bottom: 2px solid var(--clr-border);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--clr-text-muted);
+}
+
+
+/* ── Workshop type grid (Redesign) ───────────────────────────────────
+   Replaces the simple list rows with full responsive CSS cards.     */
+
+.wtype-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.wtype-card {
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+.wtype-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(234,88,12,0.1);
+  border-color: rgba(234,88,12,0.3);
+}
+
+.wtype-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.wtype-icon {
+  font-size: 2rem;
+  color: var(--clr-primary);
+  background: linear-gradient(135deg, rgba(234,88,12,0.1), rgba(249,115,22,0.05));
+  padding: 0.6rem;
+  border-radius: var(--radius-md);
+}
+
+.wtype-tags .badge {
+  font-weight: 600;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+}
+
+.wtype-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--clr-text);
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.wtype-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--clr-text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.wtype-actions {
+  margin-top: auto;
+  border-top: 1px solid var(--clr-border);
+  padding-top: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wtype-actions .btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+}
+
+
+/* ── Jumbotron (public landing pages) ──────────────────────────── */
+
+.jumbotron {
+  background: linear-gradient(135deg, var(--clr-primary-lt), #dbeafe);
+  border: 1px solid rgba(199,217,251,.6);
+  border-radius: var(--radius-md);
+  padding: 2rem 1.75rem;
+  backdrop-filter: blur(6px);
+}
+.jumbotron h1 { font-size: 1.4rem; color: var(--clr-primary-dk); margin-bottom: 0.5rem; }
+.jumbotron p  { color: var(--clr-text-muted); margin: 0; }
+
+
+/* ── Detail panels ─────────────────────────────────────────────────
+   Key-value layout used on workshop details, profile view, etc.     */
+
+.detail-panel {
+  background: var(--clr-surface);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+.detail-row {
+  display: flex;
+  align-items: baseline;
+  border-bottom: 1px solid var(--clr-border);
+  padding: 13px 16px;
+  gap: 12px;
+  transition: background var(--transition);
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-row:hover {
+  background: rgba(234, 88, 12, 0.02);
+}
+
+.detail-label {
+  min-width: 150px;
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--clr-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.detail-value { font-weight: 500; font-size: 0.9rem; }
+
+
+/* ── Profile page ──────────────────────────────────────────────────
+   Better gradient with the secondary purple, plus hover lift.       */
+
+.profile-header {
+  background: linear-gradient(135deg, #ea580c, #f97316);
+  padding: 1.75rem;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* decorative element */
+.profile-header::before {
+  content: '';
+  position: absolute;
+  top: -20px; right: -20px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.06);
+  animation: float 12s ease-in-out infinite;
+}
+
+.avatar-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-head);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,.3);
+  transition: transform var(--transition);
+}
+
+.avatar-circle:hover {
+  transform: scale(1.08);
+}
+
+.profile-name { color: #fff; font-family: var(--font-head); font-weight: 600; font-size: 1.15rem; margin: 0; }
+.profile-sub  { color: rgba(255,255,255,.7); font-size: 0.82rem; margin: 2px 0 0; }
+
+
+/* ── Comment cards (workshop details page) ─────────────────────── */
+
+.comment-card {
+  background: var(--clr-surface);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 1rem;
+  transition: box-shadow var(--transition);
+  animation: fadeInUp 0.35s ease-out both;
+}
+
+.comment-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.comment-card-header {
+  background: rgba(248, 250, 252, 0.6);
+  padding: 10px 16px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  border-bottom: 1px solid var(--clr-border);
+}
+.comment-entry {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--clr-border);
+  font-size: 0.875rem;
+}
+.comment-entry:last-child { border-bottom: none; }
+.comment-meta { font-size: 0.75rem; color: var(--clr-text-muted); margin-bottom: 4px; }
+
+
+/* ── Form validation errors ────────────────────────────────────── */
+
+.errorlist { list-style: none; padding: 0; margin: 4px 0 0; }
+.errorlist li { color: var(--clr-danger); font-size: 0.8rem; }
+
+
+/* ── Modals (terms & conditions, etc.) ─────────────────────────── */
+
+.modal-content {
+  border: none;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  background: var(--clr-surface);
+  backdrop-filter: blur(12px);
+}
+.modal-header { border-bottom: 1px solid var(--clr-border); padding: 1rem 1.25rem; }
+.modal-body { padding: 1.25rem; }
+.modal-title { font-family: var(--font-head); font-weight: 600; font-size: 1rem; }
+
+
+/* ── Stats cards (statistics page) ─────────────────────────────── */
+
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+
+.stat-card {
+  background: var(--clr-surface);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  text-align: center;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ea580c, #f97316);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-card:hover::before {
+  opacity: 0.7;
+}
+
+.stat-card .sc-num {
+  font-family: var(--font-head);
+  font-size: 2.1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ea580c, #f97316);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+.stat-card .sc-label { font-size: 0.78rem; color: var(--clr-text-muted); margin-top: 6px; }
+
+
+/* ── Responsive adjustments ────────────────────────────────────────
+   Nothing fancy — just tighten up spacing and stack things
+   vertically when the screen gets narrow.                           */
+
+@media (max-width: 900px) {
+  /* stack the auth layout on tablets/phones */
+  .auth-centered-wrapper { padding: 1.5rem; }
+  .auth-card { padding: 2rem 1.5rem; }
+}
+
+@media (max-width: 768px) {
+  .base-content { padding-top: 72px; padding-bottom: 56px; }
+  .auth-centered-wrapper { padding: 1rem; }
+  .auth-card { padding: 1.75rem 1.25rem; }
+  .welcome-banner { padding: 1.5rem 1.25rem; }
+  .detail-label { min-width: 100px; }
+  .table thead th, .table tbody td { padding: 9px 10px; font-size: 0.83rem; }
+  h2 { font-size: 1.2rem; }
+  .page-header h2 { font-size: 1.15rem; }
+  .detail-row { flex-direction: column; gap: 2px; }
+
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 2.5rem 1.5rem 1.5rem;
+  }
+
+  .bg-blob-1 { width: 300px; height: 300px; }
+  .bg-blob-2 { width: 250px; height: 250px; }
+  .bg-blob-3 { display: none; }
+
+  /* hide brand panel completely on small screens */
+  .auth-split-showcase { display: none; }
+}
+
+@media (max-width: 480px) {
+  .auth-card { border-radius: var(--radius-md); }
+  .btn { padding: 0.5rem 0.9rem; font-size: 0.85rem; }
+}
+
+
+/* ── Utility overrides ─────────────────────────────────────────── */
+
+.text-muted { color: var(--clr-text-muted) !important; }
+.text-primary { color: var(--clr-primary) !important; }
+.text-success { color: var(--clr-success) !important; }
+.text-danger  { color: var(--clr-danger) !important; }
+.float-right { float: right; }
+.mb-3 { margin-bottom: 1rem !important; }
+.mx-4 { margin-left: 1.25rem !important; margin-right: 1.25rem !important; }
+
+/* stagger animation delays for lists */
+.detail-row:nth-child(1) { animation-delay: 0.05s; }
+.detail-row:nth-child(2) { animation-delay: 0.10s; }
+.detail-row:nth-child(3) { animation-delay: 0.15s; }
+.detail-row:nth-child(4) { animation-delay: 0.20s; }
+.detail-row:nth-child(5) { animation-delay: 0.25s; }
+.detail-row:nth-child(6) { animation-delay: 0.30s; }
+
+.detail-row {
+  animation: fadeInUp 0.35s ease-out both;
+}
+
+.comment-card:nth-child(1) { animation-delay: 0.05s; }
+.comment-card:nth-child(2) { animation-delay: 0.10s; }
+.comment-card:nth-child(3) { animation-delay: 0.15s; }
+.comment-card:nth-child(4) { animation-delay: 0.20s; }

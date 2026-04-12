@@ -1,0 +1,158 @@
+{% extends 'workshop_app/base.html' %}
+
+{% block title %}Create Account{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:640px;padding-top:1.5rem">
+
+    <div class="page-header">
+        <div>
+            <h2>Coordinator Registration</h2>
+            <p class="text-muted" style="margin:0;font-size:.875rem">Takes about a minute — we just need a few basics</p>
+        </div>
+    </div>
+
+    <style>
+        .stepper-header { display: flex; justify-content: space-between; margin-bottom: 2.5rem; position: relative; padding: 0 1rem; }
+        .stepper-header::before { content: ''; position: absolute; top: 15px; left: 15%; width: 70%; height: 2px; background: var(--clr-border); z-index: 1; transition: background 0.4s; }
+        .step-item { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .step-circle { width: 32px; height: 32px; border-radius: 50%; background: var(--clr-surface); border: 2px solid var(--clr-border); display: flex; align-items: center; justify-content: center; font-weight: 700; transition: all 0.3s ease; color: var(--clr-text-muted); }
+        .step-item.active .step-circle { border-color: var(--clr-primary); background: var(--clr-primary); color: #fff; box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.15); }
+        .step-item.completed .step-circle { border-color: #16a34a; background: #16a34a; color: #fff; }
+        .step-label { font-size: 0.8rem; font-weight: 500; color: var(--clr-text-muted); text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.3s; }
+        .step-item.active .step-label { color: var(--clr-text); font-weight: 700; }
+        .step-item.completed .step-label { color: #16a34a; font-weight: 600; }
+        
+        .reg-form th, .reg-form td { border: none; padding: 0; display: block; width: 100%; }
+        .reg-form tr { display: none; margin-bottom: 1.25rem; animation: fadeIn 0.4s ease-out; }
+        .reg-form tr.active-step { display: block; }
+        label.required::after { content: " *"; color: var(--clr-danger); }
+        .errorlist { list-style: none; padding: 0; margin: 4px 0 0; }
+        .errorlist li { color: var(--clr-danger); font-size: 0.8rem; font-weight: 500; }
+        .step-actions { display: flex; justify-content: space-between; margin-top: 2rem; border-top: 1px solid var(--clr-border); padding-top: 1.5rem; }
+    </style>
+
+    <div class="card" style="border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: 1rem;">
+        <div class="card-body">
+            
+            <div class="stepper-header">
+                <div class="step-item active" id="indicator-0">
+                    <div class="step-circle">1</div>
+                    <span class="step-label">Account</span>
+                </div>
+                <div class="step-item" id="indicator-1">
+                    <div class="step-circle">2</div>
+                    <span class="step-label">Institute</span>
+                </div>
+                <div class="step-item" id="indicator-2">
+                    <div class="step-circle">3</div>
+                    <span class="step-label">Finish</span>
+                </div>
+            </div>
+
+            {% if form.errors %}
+            <div class="alert alert-danger" style="display:flex; align-items:center; gap:8px;">
+                <span class="material-icons" style="font-size:20px">error_outline</span>
+                <span>Please correct the errors in the form before proceeding.</span>
+            </div>
+            {% endif %}
+
+            <form method="post" id="stepperForm" novalidate>
+                {% csrf_token %}
+                <table class="reg-form" style="width:100%" id="formTable">
+                    {{ form.as_table }}
+                </table>
+                <div class="step-actions">
+                    <button type="button" class="btn btn-outline-secondary btn-lg" id="btnPrev" style="display:none; font-weight: 500;">
+                        <span class="material-icons" style="font-size:16px; vertical-align:middle; margin-right:4px;">arrow_back</span> Back
+                    </button>
+                    <!-- spacer -->
+                    <div style="flex:1;"></div>
+                    <button type="button" class="btn btn-primary btn-lg" id="btnNext" style="font-weight: 600;">
+                        Next Step <span class="material-icons" style="font-size:16px; vertical-align:middle; margin-left:4px;">arrow_forward</span>
+                    </button>
+                    <button type="submit" class="btn btn-success btn-lg" id="btnSubmit" style="display:none; font-weight: 600;">
+                        Create Account <span class="material-icons" style="font-size:16px; vertical-align:middle; margin-left:4px;">check_circle</span>
+                    </button>
+                </div>
+            </form>
+            
+            <div class="text-center" style="margin-top: 1.5rem;">
+                <span style="color:var(--clr-text-muted); font-size:0.85rem;">Already have an account?</span>
+                <a href="{% url 'workshop_app:login' %}" style="font-weight:600; font-size:0.85rem;">Sign In</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const rows = Array.from(document.querySelectorAll('#formTable tbody tr'));
+        if (rows.length === 0) return;
+
+        // Group fields visually into 3 steps
+        const stepCount = 3;
+        const itemsPerStep = Math.ceil(rows.length / stepCount);
+        
+        let currentStep = 0;
+        let stepGroups = [];
+
+        // Distribute rows
+        for(let i=0; i<stepCount; i++) {
+            stepGroups.push(rows.slice(i * itemsPerStep, (i + 1) * itemsPerStep));
+        }
+
+        // If there are errors, automatically jump to step containing the first error
+        for(let i=0; i<stepCount; i++) {
+            if (stepGroups[i].some(row => row.querySelector('.errorlist'))) {
+                currentStep = i;
+                break;
+            }
+        }
+
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        const btnSubmit = document.getElementById('btnSubmit');
+
+        function renderStep() {
+            // Hide all, show current group
+            rows.forEach(r => r.classList.remove('active-step'));
+            stepGroups[currentStep].forEach(r => r.classList.add('active-step'));
+
+            // Update indicators
+            for(let i=0; i<stepCount; i++) {
+                const ind = document.getElementById('indicator-' + i);
+                ind.classList.remove('active', 'completed');
+                if (i < currentStep) ind.classList.add('completed');
+                if (i === currentStep) ind.classList.add('active');
+            }
+
+            // Update buttons
+            btnPrev.style.display = currentStep > 0 ? 'inline-flex' : 'none';
+            if (currentStep === stepCount - 1) {
+                btnNext.style.display = 'none';
+                btnSubmit.style.display = 'inline-flex';
+            } else {
+                btnNext.style.display = 'inline-flex';
+                btnSubmit.style.display = 'none';
+            }
+        }
+
+        btnNext.addEventListener('click', () => {
+            if (currentStep < stepCount - 1) {
+                currentStep++;
+                renderStep();
+            }
+        });
+
+        btnPrev.addEventListener('click', () => {
+            if (currentStep > 0) {
+                currentStep--;
+                renderStep();
+            }
+        });
+
+        renderStep();
+    });
+</script>
+{% endblock %}

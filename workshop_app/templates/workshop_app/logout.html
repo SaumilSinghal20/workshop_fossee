@@ -1,0 +1,14 @@
+{% extends 'workshop_app/base.html' %}
+
+{% block title %}Signed Out{% endblock %}
+
+{% block content %}
+<div class="auth-centered-wrapper">
+    <div class="auth-card" style="text-align:center">
+        <div style="font-size:3rem;margin-bottom:1rem">👋</div>
+        <h2 style="font-size:1.3rem;margin-bottom:.5rem">You've been signed out</h2>
+        <p class="text-muted" style="font-size:.875rem;margin-bottom:1.5rem">Thanks for using FOSSEE Workshops. See you next time.</p>
+        <a href="/" class="btn btn-primary btn-lg" style="width:100%">Sign In Again</a>
+    </div>
+</div>
+{% endblock %}

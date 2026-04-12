@@ -1,0 +1,57 @@
+{% extends 'workshop_app/base.html' %}
+{% load custom_filters %}
+
+{% block title %}{{ workshop_type.name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:700px;padding-top:1.5rem">
+
+    <div class="page-header">
+        <div>
+            <h2>{{ workshop_type.name }}</h2>
+            <p class="text-muted" style="margin:0;font-size:.875rem">What this workshop covers and how long it runs</p>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+            {% if request.user|has_group:"instructor" %}
+            <a href="{% url 'workshop_app:edit_workshop_type' workshop_type.id %}" class="btn btn-outline-info" style="font-size:.85rem">
+                <span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:3px">edit</span>
+                Edit
+            </a>
+            {% endif %}
+            <a href="{% url 'workshop_app:workshop_type_list' %}" class="btn btn-outline-info" style="font-size:.85rem">
+                <span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:3px">arrow_back</span>
+                All Types
+            </a>
+        </div>
+    </div>
+
+    <div class="detail-panel" style="margin-bottom:1.5rem">
+        <div class="detail-row">
+            <span class="detail-label">Workshop Name</span>
+            <span class="detail-value">{{ workshop_type.name }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Duration</span>
+            <span class="detail-value">{{ workshop_type.duration }} day{% if workshop_type.duration != 1 %}s{% endif %}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Description</span>
+            <span class="detail-value">{{ workshop_type.description }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Terms &amp; Conditions</span>
+            <span class="detail-value" style="white-space:pre-wrap">{{ workshop_type.terms_and_conditions }}</span>
+        </div>
+    </div>
+
+    {% if not request.user|has_group:"instructor" %}
+    <div style="text-align:center">
+        <a href="{% url 'workshop_app:propose_workshop' %}" class="btn btn-primary btn-lg">
+            <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:5px">add_circle_outline</span>
+            Propose This Workshop
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
