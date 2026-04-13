@@ -96,5 +96,6 @@ The interface has been modernized with a professional split-screen entry, dark m
 
 <img width="1835" height="927" alt="image" src="https://github.com/user-attachments/assets/3c19ddd7-e75d-4d6e-a4f9-2ba4fc8cccce" />
 
-<img width="1835" height="927" alt="image" src="https://github.com/user-attachments/assets/245d9738-0cea-4b8e-ade3-6c16093fb9af" />
+<img width="1842" height="842" alt="image" src="https://github.com/user-attachments/assets/51c40cbc-71fd-4555-9322-b40442ca9ea3" />
+
 
