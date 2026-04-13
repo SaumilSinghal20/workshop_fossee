@@ -76,16 +76,15 @@ Mainly just touched things in `workshop_app/templates/` and `workshop_app/static
 ### Before Redesign
 The original interface used the default Django admin styling for authentication and basic Bootstrap tables for data display, which felt generic and unoptimized for modern workflows.
 
-![Django Admin Login](docs/screenshots/before_redesign.png)
+![Django Admin Login](image-1.png)
 
 ### After Redesign
 The interface has been modernized with a professional split-screen entry, dark mode support, a multi-step registration flow, and an institutional-grade dashboard.
 
 #### New Login Experience
-![Split Screen Login](docs/screenshots/after_login.png)
+![Split Screen Login](image-2.png)
 
 #### Enhanced Workshop Discovery
-![alt text](image-2.png)
 ![alt text](image-3.png)
 ![alt text](image-4.png)
 ![alt text](image-5.png)
