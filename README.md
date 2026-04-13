@@ -76,18 +76,25 @@ Mainly just touched things in `workshop_app/templates/` and `workshop_app/static
 ### Before Redesign
 The original interface used the default Django admin styling for authentication and basic Bootstrap tables for data display, which felt generic and unoptimized for modern workflows.
 
-![Django Admin Login](image-1.png)
+<img width="1899" height="879" alt="image" src="https://github.com/user-attachments/assets/b9922982-c416-4654-a1a5-adc5e6f442c7" />
+
 
 ### After Redesign
 The interface has been modernized with a professional split-screen entry, dark mode support, a multi-step registration flow, and an institutional-grade dashboard.
 
 #### New Login Experience
-![Split Screen Login](image-2.png)
+<img width="1824" height="931" alt="image" src="https://github.com/user-attachments/assets/492ac107-daa3-4b06-ad70-6027e6f7f969" />
+
 
 #### Enhanced Workshop Discovery
-![alt text](image-3.png)
-![alt text](image-4.png)
-![alt text](image-5.png)
-![alt text](image-6.png)
-![alt text](image-7.png)
-![alt text](image-8.png)# workshop_fossee
+<img width="1879" height="914" alt="image" src="https://github.com/user-attachments/assets/d44e745c-643b-451d-8deb-c765eeee030e" />
+
+<img width="1834" height="929" alt="image" src="https://github.com/user-attachments/assets/388c5bdc-21c2-4f5c-99e5-e666730d4716" />
+<img width="1838" height="918" alt="image" src="https://github.com/user-attachments/assets/2cf1b423-b480-4b67-af2d-e718a4fbe76e" />
+
+<img width="1838" height="918" alt="image" src="https://github.com/user-attachments/assets/454b1e09-9d74-4cb3-8466-1e659a7d88ca" />
+
+<img width="1835" height="927" alt="image" src="https://github.com/user-attachments/assets/3c19ddd7-e75d-4d6e-a4f9-2ba4fc8cccce" />
+
+<img width="1835" height="927" alt="image" src="https://github.com/user-attachments/assets/245d9738-0cea-4b8e-ade3-6c16093fb9af" />
+
